@@ -3,13 +3,7 @@
 import numpy as np
 import pandas as pd
 from pymongo import MongoClient
-import matplotlib
-
-
-
-
-
-
+from Api import obtener_documentos
 
 cant_Num = int(input("cuantos datos desea ingresar? "))
 client = MongoClient("mongodb://127.0.0.1:27017/")
@@ -58,6 +52,7 @@ def resolutions(cant_Num, arr_sorted):
         desviacion += desviacion
     desviacion_media = round(desviacion/len(arr_sorted), 2)
     print(f'Esta la desviacion media {desviacion_media}')
+
 
     varianza_resultado = 0
     for elemento in arr_sorted:
