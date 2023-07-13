@@ -1,8 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_pymongo import PyMongo
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-
+from pdf_generator import generar_pdf
+from calculator import statistical_calculator
 
 app = Flask(__name__)
 app.config['MONGO_URI'] = 'mongodb://localhost:27017/Esp32'
@@ -20,9 +19,9 @@ def obtener_documentos():
 
     # Realizar la operación
     arr_sorted_campo2 = campo2_output[:50] if len(campo2_output) >= 50 else campo2_output
-    desviacion_media_campo2, resultado_campo2 = calcular_desviacion_media(arr_sorted_campo2)
+    desviacion_media_campo2,media_campo2, varianza_campo2 = statistical_calculator(arr_sorted_campo2)
     pdf_filename = 'Reporte.pdf'
-    generar_pdf(arr_sorted_campo2,desviacion_media_campo2,pdf_filename)
+    generar_pdf(arr_sorted_campo2,desviacion_media_campo2,varianza_campo2,media_campo2,pdf_filename)
 
 
     return jsonify({
@@ -30,39 +29,7 @@ def obtener_documentos():
         'Desviacion_Media': desviacion_media_campo2
     })
 
-def calcular_desviacion_media(arr_sorted):
-    media = sum(arr_sorted) / len(arr_sorted)
 
-    desviacion = 0
-    for elemento in arr_sorted:
-        desviacion += abs(elemento - media)
-    desviacion_media = round(desviacion / len(arr_sorted), 2)
-    return desviacion_media, media
-
-def generar_pdf(arr_sorted_campo2, desviacion_media_campo2,pdf_filename):
-    c = canvas.Canvas(pdf_filename, pagesize=letter)
-    c.setFont("Helvetica", 12)
-    c.setFont("Helvetica", 12)
-    c.drawString(100, 700, "Datos de Humedad:")
-
-    # Ajustar la posición de los datos de humedad en forma horizontal con salto de línea
-    x_pos = 100
-    y_pos = 680
-    max_width = 550  # Ancho máximo disponible para los datos
-    for dato in arr_sorted_campo2:
-        text_width = c.stringWidth(str(dato), "Helvetica", 12)
-        if x_pos + text_width > max_width:
-            x_pos = 100  # Volver al inicio de la línea
-            y_pos -= 20  # Saltar a la siguiente línea
-        c.drawString(x_pos, y_pos, str(dato))
-        x_pos += text_width + 20  # Dejar un espacio entre los datos
-
-    # Ajustar la posición vertical después de mostrar los datos de humedad
-    y_pos -= 40  # Espacio adicional antes de la desviación media
-
-    c.drawString(100, y_pos, "Desviación Media de Humedad:")
-    c.drawString(100, y_pos - 20, str(desviacion_media_campo2))
-    c.save()
 @app.route('/api/documentos', methods=['POST'])
 def agregar_documento():
     nuevo_documento = {

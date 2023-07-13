@@ -51,7 +51,7 @@ def resolutions(cant_Num, arr_sorted):
         desviacion = abs(elemento - resultado)
         desviacion += desviacion
     desviacion_media = round(desviacion/len(arr_sorted), 2)
-    print(f'Esta la desviacion media {desviacion_media}')
+    print(f'Esta la varianza media {desviacion_media}')
 
 
     varianza_resultado = 0
