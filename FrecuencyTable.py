@@ -3,7 +3,6 @@
 import numpy as np
 import pandas as pd
 from pymongo import MongoClient
-from Api import obtener_documentos
 
 cant_Num = int(input("cuantos datos desea ingresar? "))
 client = MongoClient("mongodb://127.0.0.1:27017/")

@@ -1,6 +1,6 @@
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
-def generar_pdf(arr_sorted_campo2, desviacion_media_campo2,varianza_campo2,media_campo2,pdf_filename):
+def generar_pdf(arr_sorted_campo2, desviacion_media_campo2,varianza_campo2,media_campo2,desviacion_estandar_campo2,pdf_filename):
     c = canvas.Canvas(pdf_filename, pagesize=letter)
     c.setFont("Helvetica", 12)
     c.drawString(70, 700, "Datos de Humedad:")
@@ -26,4 +26,7 @@ def generar_pdf(arr_sorted_campo2, desviacion_media_campo2,varianza_campo2,media
     y_pos -= 40  # Espacio adicional antes de la desviación media
     c.drawString(70, y_pos, "Media de Humedad:")
     c.drawString(70, y_pos - 20, str(media_campo2))
+    y_pos -= 40  # Espacio adicional antes de la desviación media
+    c.drawString(70, y_pos, "Desviacion estandar humedad:")
+    c.drawString(70, y_pos - 20, str(round(desviacion_estandar_campo2,2)))
     c.save()

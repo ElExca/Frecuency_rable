@@ -2,64 +2,86 @@ from flask import Flask, jsonify, request
 from flask_pymongo import PyMongo
 from pdf_generator import generar_pdf
 from calculator import statistical_calculator
+import jwt
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-app.config['MONGO_URI'] = 'mongodb://localhost:27017/Esp32'
+app.config['MONGO_URI'] = 'mongodb+srv://<username>:<password>@<clustername>.mongodb.net/<dbname>?retryWrites=true&w=majority'
+app.config['SECRET_KEY'] = 'b99878292951aa53e17598417a4a0a0121fcd0808ef8ae13f76a786a09bdaa4f'
 mongo = PyMongo(app)
 
 
+
+@app.route('/login', methods=['POST'])
+def login():
+    username = request.json.get('username')
+    password = request.json.get('password')
+
+    # Buscar al usuario en la base de datos MongoDB
+    user = mongo.db.users.find_one({'username': username})
+
+    if user and check_password_hash(user['password'], password):
+        # Generar el token JWT
+        token = jwt.encode({'username': username}, app.config['SECRET_KEY'], algorithm='HS256')
+        return jsonify({'token': token})
+
+    return jsonify({'message': 'Credenciales inválidas'}), 401
+
+@app.route('/register', methods=['POST'])
+def register():
+    username = request.json.get('username')
+    password = request.json.get('password')
+
+    # Verificar si el usuario ya existe en la base de datos
+    existing_user = mongo.db.users.find_one({'username': username})
+    if existing_user:
+        return jsonify({'message': 'El nombre de usuario ya está en uso'}), 400
+
+    # Generar un hash de la contraseña
+    password_hash = generate_password_hash(password)
+
+    # Crear un nuevo usuario en la base de datos
+    new_user = {'username': username, 'password': password_hash}
+    mongo.db.users.insert_one(new_user)
+
+    return jsonify({'message': 'Usuario registrado exitosamente'}), 201
 @app.route('/api/calcular', methods=['GET'])
 def obtener_documentos():
-    documentos = mongo.db.Datos.find()
-    campo1_output = []
-    campo2_output = []
-    for documento in documentos:
-        campo1_output.append(documento['Temperatura'])
-        campo2_output.append(documento['Humedad'])
+    token = request.headers.get('Authorization')
 
-    # Realizar la operación
-    arr_sorted_campo2 = campo2_output[:50] if len(campo2_output) >= 50 else campo2_output
-    desviacion_media_campo2,media_campo2, varianza_campo2 = statistical_calculator(arr_sorted_campo2)
-    pdf_filename = 'Reporte.pdf'
-    generar_pdf(arr_sorted_campo2,desviacion_media_campo2,varianza_campo2,media_campo2,pdf_filename)
+    if not token:
+        return jsonify({'message': 'Token faltante'}), 401
+
+    try:
+        payload = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+        username = payload['username']
+        documentos = mongo.db.Datos.find()
+        campo1_output = []
+        campo2_output = []
+        for documento in documentos:
+            campo1_output.append(documento['Temperatura'])
+            campo2_output.append(documento['Humedad'])
+
+        # Realizar la operación
+        arr_sorted_campo2 = campo2_output[:50] if len(campo2_output) >= 50 else campo2_output
+        desviacion_media_campo2, media_campo2, varianza_campo2, desviacion_estandar_campo2 = statistical_calculator(
+            arr_sorted_campo2)
+        pdf_filename = 'Reporte.pdf'
+        generar_pdf(arr_sorted_campo2, desviacion_media_campo2, varianza_campo2, media_campo2,
+                    desviacion_estandar_campo2, pdf_filename)
+
+        return jsonify({
+            'Humedad': campo2_output,
+            'Desviacion_Media': desviacion_media_campo2
+        })
 
 
-    return jsonify({
-        'Humedad': campo2_output,
-        'Desviacion_Media': desviacion_media_campo2
-    })
+    except jwt.InvalidTokenError:
+        return jsonify({'message': 'Token inválido'}), 401
 
 
-@app.route('/api/documentos', methods=['POST'])
-def agregar_documento():
-    nuevo_documento = {
-        'campo1': request.json['campo1'],
-        'campo2': request.json['campo2']
-    }
-    mongo.db.datos.insert_one(nuevo_documento)
-    return jsonify({'mensaje': 'Documento agregado correctamente'})
 
-@app.route('/api/documentos/<id>', methods=['GET'])
-def obtener_documento(id):
-    documento = mongo.db.nombre_de_la_coleccion.find_one({'_id': id})
-    if documento:
-        output = {'campo1': documento['campo1'], 'campo2': documento['campo2']}
-    else:
-        output = 'Documento no encontrado'
-    return jsonify({'documento': output})
 
-@app.route('/api/documentos/<id>', methods=['PUT'])
-def actualizar_documento(id):
-    documento = mongo.db.nombre_de_la_coleccion.find_one({'_id': id})
-    if documento:
-        documento_actualizado = {
-            'campo1': request.json['campo1'],
-            'campo2': request.json['campo2']
-        }
-        mongo.db.Datos.update_one({'_id': id}, {'$set': documento_actualizado})
-        return jsonify({'mensaje': 'Documento actualizado correctamente'})
-    else:
-        return jsonify({'mensaje': 'Documento no encontrado'})
 
 @app.route('/api/documentos/<id>', methods=['DELETE'])
 def eliminar_documento(id):
