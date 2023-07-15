@@ -6,6 +6,7 @@ from pdf_generator import generar_pdf
 from calculator import statistical_calculator
 import jwt
 from werkzeug.security import generate_password_hash, check_password_hash
+import pandas as pd
 
 app = Flask(__name__)
 app.config['MONGO_URI'] = 'mongodb://localhost:27017/Esp32'
@@ -64,18 +65,24 @@ def obtener_documentos():
             campo1_output.append(documento['Temperatura'])
             campo2_output.append(documento['Humedad'])
         pdf_filename = 'ReporteSensores.pdf'
-        pagesize = letter
-        pdf_path = 'C:\Reportes'
         # Realizar la operación
         arr_sorted_campo2 = campo2_output[:50] if len(campo2_output) >= 50 else campo2_output
-        desviacion_media_campo2, media_campo2, varianza_campo2, desviacion_estandar_campo2 = statistical_calculator(
+        arr_sorted_campo1 = campo1_output[:50] if len(campo1_output) >= 50 else campo1_output
+        desviacion_media_campo2, media_campo2, varianza_campo2, desviacion_estandar_campo2, arr_ordenate_campo2, table_frecuency_campo2= statistical_calculator(
             arr_sorted_campo2)
-        generar_pdf(arr_sorted_campo2, desviacion_media_campo2, varianza_campo2, media_campo2,
-                    desviacion_estandar_campo2, pdf_filename,pdf_path,pagesize)
+
+        desviacion_media_campo1, media_campo1, varianza_campo1, desviacion_estandar_campo1, arr_ordenate_campo1,table_frecuency_campo1 = statistical_calculator(
+            arr_sorted_campo1)
+        print('Frecuency_campo2: ', type(table_frecuency_campo2))
+        generar_pdf(pd.DataFrame(table_frecuency_campo2),arr_sorted_campo2, desviacion_media_campo2, varianza_campo2, media_campo2,
+                    desviacion_estandar_campo2,arr_sorted_campo1, arr_ordenate_campo2, arr_ordenate_campo1,
+                    desviacion_media_campo1, media_campo1, varianza_campo1, desviacion_estandar_campo1,pdf_filename)
+
 
         return jsonify({
             'Humedad': campo2_output,
-            'Desviacion_Media': desviacion_media_campo2
+            'Temperature': campo1_output
+
         })
 
 

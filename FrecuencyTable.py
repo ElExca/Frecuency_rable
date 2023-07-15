@@ -39,7 +39,7 @@ print(f"Conjunto de datos Si ordenados:\n {arr_sorted}")
 
 def resolutions(cant_Num, arr_sorted):
 
-    K = 1 + (3.322 * np.log10(cant_Num))
+
     media = 0
     for elemento in arr_sorted:
         media = elemento + media
@@ -62,7 +62,7 @@ def resolutions(cant_Num, arr_sorted):
 
     desviacion_estandar = (varianza**.5)
     print(f'La desviacion estandar {round(desviacion_estandar,2)}')
-
+    K = 1 + (3.322 * np.log10(cant_Num))
     K_round = round(K)
     print(f"K = 1 + 3.322 log10({cant_Num}) = {K}")
     print(f"K = {K_round}")
@@ -77,7 +77,7 @@ def resolutions(cant_Num, arr_sorted):
     valor_min = arr_sorted[0]
     datos = np.zeros((6, 6))  # ! fila, columna
     df = pd.DataFrame(
-        datos, columns=["LimInf", "LimSup", "Frecuencia", "Marca de clase", "LimInfExacta", "LimSupExacta"])
+        datos, columns=["LimInf", "LimSup", "Frecuencia", "Marca_de_clase", "LimInfExacta", "LimSupExacta"])
 
     df.iloc[0, 0] = valor_min
     df.iloc[0, 1] = valor_min+A_round-variabilidad
@@ -86,10 +86,8 @@ def resolutions(cant_Num, arr_sorted):
         df.iloc[i, 1] = df.iloc[i, 0]+A_round-variabilidad
         df.iloc[:, 2] = [np.sum((arr_sorted >= df.iloc[i, 0]) & (  # type: ignore
             arr_sorted <= df.iloc[i, 1])) for i in range(df.shape[0])]
-        df.iloc[:, 3] = (df["LimInf"] + df["LimSup"]) / 2
-        df.iloc[:, 4] = (df["LimInf"]-(variabilidad/2))
-        df.iloc[:, 5] = (df["LimSup"]+(variabilidad/2))
+        df.iloc[:, 3] = (df[''] + df['']) / 2
+        df.iloc[:, 4] = (df['']-(variabilidad/2))
+        df.iloc[:, 5] = (df['']+(variabilidad/2))
     print(df)
-
-
 resolutions(cant_Num, arr_sorted)
