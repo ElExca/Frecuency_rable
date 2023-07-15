@@ -74,7 +74,7 @@ def obtener_documentos():
         desviacion_media_campo1, media_campo1, varianza_campo1, desviacion_estandar_campo1, arr_ordenate_campo1,table_frecuency_campo1 = statistical_calculator(
             arr_sorted_campo1)
         print('Frecuency_campo2: ', type(table_frecuency_campo2))
-        generar_pdf(pd.DataFrame(table_frecuency_campo2),arr_sorted_campo2, desviacion_media_campo2, varianza_campo2, media_campo2,
+        generar_pdf(pd.DataFrame(table_frecuency_campo2),pd.DataFrame(table_frecuency_campo1),arr_sorted_campo2, desviacion_media_campo2, varianza_campo2, media_campo2,
                     desviacion_estandar_campo2,arr_sorted_campo1, arr_ordenate_campo2, arr_ordenate_campo1,
                     desviacion_media_campo1, media_campo1, varianza_campo1, desviacion_estandar_campo1,pdf_filename)
 

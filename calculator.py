@@ -17,7 +17,6 @@ def statistical_calculator(arr_sorted):
 
     desviacion_estandar = (varianza ** .5)
     arr_ordenate = np.sort(arr_sorted)
-    print(arr_ordenate)
 
     K = 1 + (3.322 * np.log10(len(arr_sorted)))
     K_round = round(K)
@@ -46,6 +45,7 @@ def statistical_calculator(arr_sorted):
         table_frecuency.iloc[:, 3] = (table_frecuency["LimInf"] + table_frecuency["LimSup"]) / 2
         table_frecuency.iloc[:, 4] = (table_frecuency["LimInf"]-(variabilidad/2))
         table_frecuency.iloc[:, 5] = (table_frecuency["LimSup"]+(variabilidad/2))
+    print(table_frecuency)
 
-    return desviacion_media, media,varianza, desviacion_estandar, arr_ordenate, pd.DataFrame(table_frecuency)
+    return desviacion_media, media, varianza, desviacion_estandar, arr_ordenate, table_frecuency
 

@@ -40,10 +40,12 @@ def generar_graficaTemperature(arr_sorted):
     return temp_filename
 
 
-def generar_pdf(table_frecuency_campo2,arr_sorted_campo2, desviacion_media_campo2,varianza_campo2,
+def generar_pdf(table_frecuency_campo2,table_frecuency_campo1,arr_sorted_campo2, desviacion_media_campo2,varianza_campo2,
                 media_campo2,desviacion_estandar_campo2,arr_sorted_campo1,arr_ordenate_campo2, arr_ordenate_campo1,
                     desviacion_media_campo1, media_campo1, varianza_campo1, desviacion_estandar_campo1,pdf_filename):
     table_str = table_frecuency_campo2.to_string(index=False)
+    table_str1 = table_frecuency_campo1.to_string(index=False)
+    print('El arr1',type(arr_sorted_campo1))
     c = canvas.Canvas(pdf_filename, pagesize=letter)
     c.setFont("Helvetica", 12)
     c.drawString(70, 700, "Datos de Humedad:")
@@ -167,5 +169,47 @@ def generar_pdf(table_frecuency_campo2,arr_sorted_campo2, desviacion_media_campo
     temp_filename = generar_graficaTemperature(arr_sorted_campo1)
     c.drawImage(temp_filename, 80, 400, width=500, height=400)
     os.remove(temp_filename)
+
+    c.showPage()
+    width, height = letter
+
+    # Configurar la posición de la tabla en el PDF
+    x_start = 50
+    y_start = height - 100
+    line_height = 20
+
+    # Ajustar el espacio entre columnas
+    x_offset = 80
+
+    # Ajustar el tamaño de la letra para que quepa la tabla en una página
+    font_size = 10
+
+    # Agregar el título de la tabla
+    c.setFont("Helvetica-Bold", 14)
+    c.drawString(x_start, y_start, "Tabla de frecuencias Temperatura")
+    y_start -= line_height
+
+    column_headers = table_frecuency_campo1.columns.tolist()
+    c.setFont("Helvetica-Bold", font_size)
+    x = x_start
+    for header in column_headers:
+        c.drawString(x, y_start, header)
+        x += x_offset  # Ajustar el espacio entre columnas
+    y_start -= line_height
+    # Agregar los datos de la tabla
+    c.setFont("Helvetica", font_size)
+    for _, row in table_frecuency_campo1.iterrows():
+        x = x_start
+        for header in column_headers:
+            value = str(row[header])
+            if header == "Marca de clase":
+                # Alinear a la izquierda y ajustar la longitud a 10 caracteres
+                c.drawString(x, y_start, value.ljust(10))
+            else:
+                c.drawString(x, y_start, value)
+            x += x_offset  # Ajustar el espacio entre columnas
+        y_start -= line_height
+
+    c.showPage()
 
     c.save()
