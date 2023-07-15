@@ -1,7 +1,27 @@
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
-def generar_pdf(arr_sorted_campo2, desviacion_media_campo2,varianza_campo2,media_campo2,desviacion_estandar_campo2,pdf_filename):
-    c = canvas.Canvas(pdf_filename, pagesize=letter)
+import matplotlib.pyplot as plt
+import os
+import  tempfile
+def generar_grafica(arr_sorted):
+    # Crear la gráfica utilizando Matplotlib
+    x_labels = range(0, len(arr_sorted), 5)  # Etiquetas del eje x
+    plt.plot(arr_sorted)
+    plt.xlabel('Tiempo')
+    plt.ylabel('Humedad')
+    plt.title('Gráfica de Humedad')
+    plt.xticks(x_labels)  # Establecer las etiquetas del eje x
+    plt.grid(True)
+
+    temp_filename = tempfile.NamedTemporaryFile(suffix='.png', delete=False).name
+    plt.savefig(temp_filename)
+    plt.close()
+
+    return temp_filename
+pdf_filename = 'ReporteSensores.pdf'
+def generar_pdf(arr_sorted_campo2, desviacion_media_campo2,varianza_campo2,media_campo2,desviacion_estandar_campo2,pdf_filename,pdf_path,pagesize):
+
+    c = canvas.Canvas(pdf_path, pagesize=pagesize)
     c.setFont("Helvetica", 12)
     c.drawString(70, 700, "Datos de Humedad:")
     # Ajustar la posición de los datos de humedad en forma horizontal con salto de línea
@@ -29,4 +49,9 @@ def generar_pdf(arr_sorted_campo2, desviacion_media_campo2,varianza_campo2,media
     y_pos -= 40  # Espacio adicional antes de la desviación media
     c.drawString(70, y_pos, "Desviacion estandar humedad:")
     c.drawString(70, y_pos - 20, str(round(desviacion_estandar_campo2,2)))
+    c.showPage()
+    temp_filename = generar_grafica(arr_sorted_campo2)
+    c.drawImage(temp_filename, 70, 400, width=400, height=300)
+    os.remove(temp_filename)
+
     c.save()

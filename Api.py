@@ -1,12 +1,14 @@
 from flask import Flask, jsonify, request
 from flask_pymongo import PyMongo
+from reportlab.lib.pagesizes import letter
+
 from pdf_generator import generar_pdf
 from calculator import statistical_calculator
 import jwt
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-app.config['MONGO_URI'] = 'mongodb+srv://angel:angel1205@bd1.5gebju1.mongodb.net/Esp32?retryWrites=true&w=majority'
+app.config['MONGO_URI'] = 'mongodb://localhost:27017/Esp32'
 app.config['SECRET_KEY'] = 'b99878292951aa53e17598417a4a0a0121fcd0808ef8ae13f76a786a09bdaa4f'
 mongo = PyMongo(app)
 
@@ -61,14 +63,15 @@ def obtener_documentos():
         for documento in documentos:
             campo1_output.append(documento['Temperatura'])
             campo2_output.append(documento['Humedad'])
-
+        pdf_filename = 'ReporteSensores.pdf'
+        pagesize = letter
+        pdf_path = 'C:\Reportes'
         # Realizar la operación
         arr_sorted_campo2 = campo2_output[:50] if len(campo2_output) >= 50 else campo2_output
         desviacion_media_campo2, media_campo2, varianza_campo2, desviacion_estandar_campo2 = statistical_calculator(
             arr_sorted_campo2)
-        pdf_filename = 'Reporte.pdf'
         generar_pdf(arr_sorted_campo2, desviacion_media_campo2, varianza_campo2, media_campo2,
-                    desviacion_estandar_campo2, pdf_filename)
+                    desviacion_estandar_campo2, pdf_filename,pdf_path,pagesize)
 
         return jsonify({
             'Humedad': campo2_output,
