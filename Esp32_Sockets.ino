@@ -3,9 +3,9 @@
 #include <ArduinoJson.h>
 #include <DHT.h>
 
-const char* ssid = "Angel A50"; // Ingresa el SSID
-const char* password = "TZRI4979"; // Ingresa la contraseña
-const char* websockets_server_host = "192.168.100.150"; // Ingresa la dirección del servidor
+const char* ssid = "ssid"; // Ingresa el SSID
+const char* password = "password"; // Ingresa la contraseña
+const char* websockets_server_host = "ip_host"; // Ingresa la dirección del servidor
 const uint16_t websockets_server_port = 5000; // Ingresa el puerto del servidor
 
 #define DHTPIN 27          // Pin del sensor DHT22
