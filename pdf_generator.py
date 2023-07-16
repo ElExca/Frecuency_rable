@@ -2,11 +2,8 @@ from reportlab.pdfgen import canvas
 import matplotlib.pyplot as plt
 import os
 from reportlab.lib.pagesizes import letter
-from tabulate import tabulate
-from reportlab.platypus import Table, TableStyle
 import  tempfile
-from reportlab.lib import colors
-import pandas as pd
+
 def generar_graficaHumedad(arr_sorted):
     # Crear la gráfica utilizando Matplotlib
     x_labels = range(0, len(arr_sorted), 5)  # Etiquetas del eje x
@@ -45,8 +42,10 @@ def generar_pdf(table_frecuency_campo2,table_frecuency_campo1,arr_sorted_campo2,
                     desviacion_media_campo1, media_campo1, varianza_campo1, desviacion_estandar_campo1,pdf_filename):
     table_str = table_frecuency_campo2.to_string(index=False)
     table_str1 = table_frecuency_campo1.to_string(index=False)
-    print('El arr1',type(arr_sorted_campo1))
-    c = canvas.Canvas(pdf_filename, pagesize=letter)
+    download_folder = os.path.join(os.path.expanduser("~"), "Downloads")
+    # Combinar la ruta de descargas con el nombre del archivo PDF
+    pdf_path = os.path.join(download_folder, pdf_filename)
+    c = canvas.Canvas(pdf_path, pagesize=letter)
     c.setFont("Helvetica", 12)
     c.drawString(70, 700, "Datos de Humedad:")
     # Ajustar la posición de los datos de humedad en forma horizontal con salto de línea
@@ -213,3 +212,5 @@ def generar_pdf(table_frecuency_campo2,table_frecuency_campo1,arr_sorted_campo2,
     c.showPage()
 
     c.save()
+
+    return pdf_path

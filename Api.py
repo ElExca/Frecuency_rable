@@ -1,6 +1,5 @@
 from flask import Flask, jsonify, request
 from flask_pymongo import PyMongo
-from reportlab.lib.pagesizes import letter
 
 from pdf_generator import generar_pdf
 from calculator import statistical_calculator

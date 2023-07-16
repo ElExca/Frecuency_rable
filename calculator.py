@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-from pandas import DataFrame
 def statistical_calculator(arr_sorted):
     media = sum(arr_sorted) / len(arr_sorted)
 
