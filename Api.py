@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_pymongo import PyMongo
-
+from flask_cors import CORS, cross_origin
 from pdf_generator import generar_pdf
 from calculator import statistical_calculator
 import jwt
@@ -12,41 +12,53 @@ app.config['MONGO_URI'] = 'mongodb://localhost:27017/Esp32'
 app.config['SECRET_KEY'] = 'b99878292951aa53e17598417a4a0a0121fcd0808ef8ae13f76a786a09bdaa4f'
 mongo = PyMongo(app)
 
+CORS(app)
 
 
-@app.route('/login', methods=['POST'])
+@app.route("/login", methods=["POST"])
+@cross_origin(origin="http://localhost:3000", headers=["Content-Type"])
 def login():
-    username = request.json.get('username')
-    password = request.json.get('password')
+    username = request.json.get("username")
+    password = request.json.get("password")
 
     # Buscar al usuario en la base de datos MongoDB
-    user = mongo.db.users.find_one({'username': username})
+    user = mongo.db.users.find_one({"username": username})
 
-    if user and check_password_hash(user['password'], password):
+    if user and check_password_hash(user["password"], password):
         # Generar el token JWT
-        token = jwt.encode({'username': username}, app.config['SECRET_KEY'], algorithm='HS256')
-        return jsonify({'token': token})
+        token = jwt.encode(
+            {"username": username}, app.config["SECRET_KEY"], algorithm="HS256"
+        )
+        return jsonify({"token": token})
 
-    return jsonify({'message': 'Credenciales inválidas'}), 401
+    return jsonify({"message": "Credenciales inválidas"}), 401
 
-@app.route('/register', methods=['POST'])
+
+@app.route("/register", methods=["POST", "OPTIONS"])
+@cross_origin(origin="http://localhost:3000", headers=["Content-Type"])
 def register():
-    username = request.json.get('username')
-    password = request.json.get('password')
+    email = request.json.get("email")
+    username = request.json.get("username")
+    password = request.json.get("password")
+
+    # Verificar si el email ya existe en la base de datos
+    existing_email = mongo.db.users.find_one({"email": email})
+    if existing_email:
+        return jsonify({"message": "El email ya está en uso"}), 400
 
     # Verificar si el usuario ya existe en la base de datos
-    existing_user = mongo.db.users.find_one({'username': username})
+    existing_user = mongo.db.users.find_one({"username": username})
     if existing_user:
-        return jsonify({'message': 'El nombre de usuario ya está en uso'}), 400
+        return jsonify({"message": "El nombre de usuario ya está en uso"}), 400
 
     # Generar un hash de la contraseña
     password_hash = generate_password_hash(password)
 
     # Crear un nuevo usuario en la base de datos
-    new_user = {'username': username, 'password': password_hash}
+    new_user = {"email": email, "username": username, "password": password_hash}
     mongo.db.users.insert_one(new_user)
 
-    return jsonify({'message': 'Usuario registrado exitosamente'}), 201
+    return jsonify({"message": "Usuario registrado exitosamente"}), 201
 @app.route('/api/calcular', methods=['GET'])
 def obtener_documentos():
     token = request.headers.get('Authorization')
