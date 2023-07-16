@@ -6,7 +6,7 @@ import pymongo
 import json
 
 # Configuración de la conexión a MongoDB Atlas
-mongo_url = 'mongodb+srv://angel:angel1205@bd1.5gebju1.mongodb.net/Esp32?retryWrites=true&w=majority'
+mongo_url = 'mongodb://localhost:27017/'
 client = pymongo.MongoClient(mongo_url)
 db = client["Esp32"]
 collection = db["Datos"]
@@ -35,10 +35,11 @@ async def handle_client(websocket):
 
 
 
-async def main():                             #Recibira de cualquier direccion
-    async with websockets.serve(handle_client,"0.0.0.0", 5000):
-        print('Se inicio el servidor')
-        await asyncio.Future()  # run forever
+async def start_server():
+    server = await websockets.serve(handle_client, "0.0.0.0", 5000)
+    print("Servidor WebSocket iniciado")
 
-if __name__ == "__main__":
-    asyncio.run(main())
+    await server.wait_closed()
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(start_server())
