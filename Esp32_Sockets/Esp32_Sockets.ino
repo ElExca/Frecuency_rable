@@ -7,12 +7,12 @@
 #include <DHT.h>
 #include <Wire.h>
 
-const char* ssid = "Angel A50"; // Ingresa el SSID
-const char* password = "TZRI4979"; // Ingresa la contraseña
-const char* websockets_server_host = "192.168.100.149"; // Ingresa la dirección del servidor
+const char* ssid = "ssid"; // Ingresa el SSID
+const char* password = "contrasenia"; // Ingresa la contraseña
+const char* websockets_server_host = "ip host"; // Ingresa la dirección del servidor
 const uint16_t websockets_server_port = 5000; // Ingresa el puerto del servidor
-#define FIREBASE_HOST "hermes-5de66-default-rtdb.firebaseio.com"
-#define FIREBASE_AUTH "G6ZA1VgHDMg6QLPpd44nikhA2Xm2RcuelveaxU46"
+#define FIREBASE_HOST "direccion"
+#define FIREBASE_AUTH "codigo de auth"
 
 String ruta = "Data-sensors";
 
