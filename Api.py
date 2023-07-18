@@ -8,7 +8,7 @@ import jwt
 from werkzeug.security import generate_password_hash, check_password_hash
 import pandas as pd
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="Public", static_url_path="/Public")
 app.config['MONGO_URI'] = ''
 app.config['SECRET_KEY'] = 'b99878292951aa53e17598417a4a0a0121fcd0808ef8ae13f76a786a09bdaa4f'
 mongo = PyMongo(app)
@@ -34,6 +34,7 @@ def login():
 def register():
     username = request.json.get('username')
     password = request.json.get('password')
+    email = request.json.get('email')
 
     # Verificar si el usuario ya existe en la base de datos
     existing_user = mongo.db.users.find_one({'username': username})
@@ -44,7 +45,7 @@ def register():
     password_hash = generate_password_hash(password)
 
     # Crear un nuevo usuario en la base de datos
-    new_user = {'username': username, 'password': password_hash}
+    new_user = {'username': username, 'password': password_hash, 'email': email}
     mongo.db.users.insert_one(new_user)
 
     return jsonify({'message': 'Usuario registrado exitosamente'}), 201
@@ -78,21 +79,22 @@ def obtener_documentos():
         arr_sorted_campo4 = campo4_output[:50] if len(campo4_output) >= 50 else campo4_output
         arr_sorted_campo5 = campo5_output[:50] if len(campo5_output) >= 50 else campo5_output
         #Temperatura
-        desviacion_media_campo1, media_campo1, varianza_campo1, desviacion_estandar_campo1, arr_ordenate_campo1,table_frecuency_campo1 = statistical_calculator(
+        desviacion_media_campo1, media_campo1, varianza_campo1, desviacion_estandar_campo1, arr_ordenate_campo1,table_frecuency_campo1,moda_campo1 = statistical_calculator(
             arr_sorted_campo1)
         #Humedad
-        desviacion_media_campo2, media_campo2, varianza_campo2, desviacion_estandar_campo2, arr_ordenate_campo2, table_frecuency_campo2= statistical_calculator(
+        desviacion_media_campo2, media_campo2, varianza_campo2, desviacion_estandar_campo2, arr_ordenate_campo2, table_frecuency_campo2,moda_campo2 = statistical_calculator(
             arr_sorted_campo2)
         #Presion
-        desviacion_media_campo3, media_campo3, varianza_campo3, desviacion_estandar_campo3, arr_ordenate_campo3, table_frecuency_campo3= statistical_calculator(
+        desviacion_media_campo3, media_campo3, varianza_campo3, desviacion_estandar_campo3, arr_ordenate_campo3, table_frecuency_campo3,moda_campo3= statistical_calculator(
             arr_sorted_campo3)
         #CO2
-        desviacion_media_campo4, media_campo4, varianza_campo4, desviacion_estandar_campo4, arr_ordenate_campo4, table_frecuency_campo4= statistical_calculator(
+        desviacion_media_campo4, media_campo4, varianza_campo4, desviacion_estandar_campo4, arr_ordenate_campo4, table_frecuency_campo4,moda_campo4= statistical_calculator(
             arr_sorted_campo4)
         #Altitud
-        desviacion_media_campo5, media_campo5, varianza_campo5, desviacion_estandar_campo5, arr_ordenate_campo5, table_frecuency_campo5= statistical_calculator(
+        desviacion_media_campo5, media_campo5, varianza_campo5, desviacion_estandar_campo5, arr_ordenate_campo5, table_frecuency_campo5,moda_campo5= statistical_calculator(
             arr_sorted_campo5)
 
+        print(arr_ordenate_campo5)
         #Generar pdf
         generar_pdf(pd.DataFrame(table_frecuency_campo2),pd.DataFrame(table_frecuency_campo1),pd.DataFrame(table_frecuency_campo3),
         pd.DataFrame(table_frecuency_campo4),pd.DataFrame(table_frecuency_campo5),arr_sorted_campo2, desviacion_media_campo2, varianza_campo2, media_campo2,
@@ -100,18 +102,18 @@ def obtener_documentos():
         desviacion_media_campo1, media_campo1, varianza_campo1, desviacion_estandar_campo1,pdf_filename,
         desviacion_media_campo3, media_campo3, varianza_campo3, desviacion_estandar_campo3, arr_ordenate_campo3,
         arr_sorted_campo3,desviacion_media_campo4, media_campo4, varianza_campo4, desviacion_estandar_campo4, arr_ordenate_campo4,
-        arr_sorted_campo4,desviacion_media_campo5, media_campo5, varianza_campo5, desviacion_estandar_campo5,arr_ordenate_campo5,arr_sorted_campo5)
+        arr_sorted_campo4,desviacion_media_campo5, media_campo5, varianza_campo5, desviacion_estandar_campo5,arr_ordenate_campo5,arr_sorted_campo5,moda_campo1,moda_campo2
+                ,moda_campo3,moda_campo4,moda_campo5)
 
+        pdf_url = "http://localhost:6000/Public/ReporteSensores.pdf"
 
-        return jsonify({
-            'Humedad': campo2_output,
-            'Temperature': campo1_output
-
-        })
+        return jsonify({'url': pdf_url})
 
 
     except jwt.InvalidTokenError:
         return jsonify({'message': 'Token inválido'}), 401
+
+
 
 
 
@@ -124,5 +126,5 @@ def eliminar_documento(id):
     else:
         return jsonify({'mensaje': 'Documento no encontrado'})
 
-if __name__ == '__main__':
-    app.run()
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=6000)
