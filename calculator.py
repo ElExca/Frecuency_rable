@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 def statistical_calculator(arr_sorted):
-    media = sum(arr_sorted) / len(arr_sorted)
+    media = round(sum(arr_sorted) / len(arr_sorted),2)
 
     desviacion = 0
     for elemento in arr_sorted:
@@ -15,6 +15,22 @@ def statistical_calculator(arr_sorted):
     varianza = round(varianza_resultado/len(arr_sorted),2)
 
     desviacion_estandar = (varianza ** .5)
+    moda_dict = {}  # Diccionario para almacenar la frecuencia de cada valor
+    moda = []  # Lista para almacenar los valores modales
+    max_frequency = 0
+
+    for value in arr_sorted:
+        if value in moda_dict:
+            moda_dict[value] += 1
+        else:
+            moda_dict[value] = 1
+        # Actualizar el valor de moda y su frecuencia máxima
+        if moda_dict[value] > max_frequency:
+            moda = [value]
+            max_frequency = moda_dict[value]
+        elif moda_dict[value] == max_frequency and value not in moda:
+            moda.append(value)
+
     arr_ordenate = np.sort(arr_sorted)
 
     K = 1 + (3.322 * np.log10(len(arr_sorted)))
@@ -44,7 +60,7 @@ def statistical_calculator(arr_sorted):
         table_frecuency.iloc[:, 3] = (table_frecuency["LimInf"] + table_frecuency["LimSup"]) / 2
         table_frecuency.iloc[:, 4] = (table_frecuency["LimInf"]-(variabilidad/2))
         table_frecuency.iloc[:, 5] = (table_frecuency["LimSup"]+(variabilidad/2))
-    print(table_frecuency)
 
-    return desviacion_media, media, varianza, desviacion_estandar, arr_ordenate, table_frecuency
+
+    return desviacion_media, media, varianza, desviacion_estandar, arr_ordenate, table_frecuency, moda
 
